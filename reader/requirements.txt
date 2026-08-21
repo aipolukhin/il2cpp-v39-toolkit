@@ -1,0 +1,3 @@
+# Stage 3 reader deps. UnityPy >=1.20 ships TypeTreeNode.from_list and the
+# read_typetree_c toggle used by dump_mono_values.py.
+UnityPy>=1.20.0

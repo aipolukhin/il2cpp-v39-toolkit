@@ -1,0 +1,21 @@
+# .NET build output
+**/bin/
+**/obj/
+*.user
+
+# fetched upstream (typetree-gen/setup.sh clones this)
+typetree-gen/upstream/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# pipeline output
+out/
+*.json.tmp
+
+# editor
+.vs/
+.idea/
+.DS_Store
