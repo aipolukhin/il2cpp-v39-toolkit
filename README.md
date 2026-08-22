@@ -40,10 +40,24 @@ The layout lives in the C# metadata. So we reconstruct it:
 |------:|------|----|-----|
 | **1** | `dumper/` (`mydump`) | `libil2cpp.so` + `global-metadata.dat` (**v39**) | clean **DummyDll**s (C# assemblies with the real field layouts) |
 | **2** | `typetree-gen/` | DummyDlls | per-assembly **TypeTree JSON** |
-| **3** | `reader/dump_mono_values.py` | TypeTree JSON + a scene/asset file | **field values** of every MonoBehaviour |
+| **3** | `reader/dump_mono_values.py` | TypeTree JSON + **one** scene/asset file | **field values** of every MonoBehaviour |
+| **3′** | `reader/scan_assets_for_classes.py` | TypeTree JSON + a **directory** of bundles | which bundle holds class X + its values |
 
 Stage 3 feeds the reconstructed TypeTree back into UnityPy so the MonoBehaviours
-become as readable as the native types.
+become as readable as the native types. Stage 3′ **sweeps** a whole Addressable set —
+because in IL2CPP games the UI/gameplay **prefabs live in per-asset bundles, not the level
+scenes**. It matches classes namespace-agnostically and rips each hit's values:
+
+```bash
+# reassemble the split MonoScript store first (else m_Script reads as "")
+cat game/globalgamemanagers.assets.split* > /tmp/ggm.assets
+python reader/scan_assets_for_classes.py --dir game/Data --resolver /tmp/ggm.assets \
+   --tt-json out/typetree/Assembly-CSharp.json --classes MyController FooWidget
+```
+
+Two rip gotchas it handles: (1) `m_Script`→name resolves only when the asset is loaded
+**together with** `globalgamemanagers` (reassemble its split parts, pass as `--resolver`);
+(2) Addressable bundle magic bytes look like zeros but UnityPy still loads them.
 
 ---
 
